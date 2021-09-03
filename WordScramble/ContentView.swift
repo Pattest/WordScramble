@@ -69,7 +69,7 @@ struct ContentView: View {
         }
 
         guard isReal(word: answer) else {
-            wordError(title: "Word not possible", message: "That isn't a real word or its less than 4 letters.")
+            wordError(title: "Word not possible", message: "That isn't a real word or its less than 3 letters.")
             return
         }
 
@@ -96,7 +96,7 @@ struct ContentView: View {
     }
 
     func isReal(word: String) -> Bool {
-        if word.count < 4 {
+        if word.count < 3 {
             return false
         }
 
