@@ -27,12 +27,19 @@ struct ContentView: View {
                     .autocapitalization(.none)
                     .padding()
 
+                Text("Score: \(getScore())")
+
                 List(usedWords, id: \.self) {
                     Image(systemName: "\($0.count).circle")
                     Text($0)
                 }
             }
             .navigationBarTitle(rootWord)
+            .navigationBarItems(
+                trailing:
+                    Button("Start new game") {
+                        startNewGame()
+                    })
             .onAppear(perform: startGame)
             .alert(isPresented: $showingError) {
                 Alert(title: Text(errorTitle),
@@ -62,7 +69,7 @@ struct ContentView: View {
         }
 
         guard isReal(word: answer) else {
-            wordError(title: "Word not possible", message: "That isn't a real word.")
+            wordError(title: "Word not possible", message: "That isn't a real word or its less than 4 letters.")
             return
         }
 
@@ -88,18 +95,42 @@ struct ContentView: View {
         return true
     }
 
+    func isReal(word: String) -> Bool {
+        if word.count < 4 {
+            return false
+        }
+
+        let checker = UITextChecker()
+        let range = NSRange(location: 0, length: word.utf16.count)
+        let misspelledRange = checker.rangeOfMisspelledWord(in: word,
+                                                            range: range,
+                                                            startingAt: 0,
+                                                            wrap: false,
+                                                            language: "en")
+
+        return misspelledRange.location == NSNotFound
+    }
+
     func wordError(title: String, message: String) {
         errorTitle = title
         errorMessage = message
         showingError = true
     }
 
-    func isReal(word: String) -> Bool {
-        let checker = UITextChecker()
-        let range = NSRange(location: 0, length: word.utf16.count)
-        let misspelledRange = checker.rangeOfMisspelledWord(in: word, range: range, startingAt: 0, wrap: false, language: "en")
+    func getScore() -> Int {
+        var score = 0
 
-        return misspelledRange.location == NSNotFound
+        usedWords.forEach { usedWord in
+            score += usedWord.count
+        }
+
+        return score
+    }
+
+    func startNewGame() {
+        usedWords.removeAll()
+        newWord = ""
+        startGame()
     }
 
     func startGame() {
